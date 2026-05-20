@@ -7,15 +7,15 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #fff7fa;
+        --bg: #f3f8ff;
         --surface: #ffffff;
-        --surface-soft: #fff0f5;
-        --pink: #f8a8c4;
-        --pink-strong: #ec6f9d;
-        --ink: #2f2529;
-        --muted: #76686e;
-        --line: #f2d9e3;
-        --shadow: 0 18px 40px rgba(214, 108, 145, 0.16);
+        --surface-soft: #eaf3ff;
+        --blue: #8fc5ff;
+        --blue-strong: #2f7edb;
+        --ink: #1d2733;
+        --muted: #667385;
+        --line: #d7e6f8;
+        --shadow: 0 18px 40px rgba(47, 126, 219, 0.14);
       }
 
       * {
@@ -27,7 +27,7 @@
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         color: var(--ink);
         background:
-          radial-gradient(circle at 15% 0%, rgba(248, 168, 196, 0.28), transparent 34rem),
+          radial-gradient(circle at 15% 0%, rgba(143, 197, 255, 0.3), transparent 34rem),
           linear-gradient(180deg, #fff 0%, var(--bg) 38%, #fff 100%);
       }
 
@@ -54,7 +54,7 @@
         gap: 16px;
         align-items: center;
         padding: 14px clamp(16px, 4vw, 40px);
-        border-bottom: 1px solid rgba(242, 217, 227, 0.86);
+        border-bottom: 1px solid rgba(215, 230, 248, 0.9);
         background: rgba(255, 255, 255, 0.92);
         backdrop-filter: blur(14px);
       }
@@ -75,8 +75,8 @@
         place-items: center;
         border-radius: 8px;
         color: #fff;
-        background: linear-gradient(135deg, var(--pink-strong), var(--pink));
-        box-shadow: 0 10px 20px rgba(236, 111, 157, 0.25);
+        background: linear-gradient(135deg, var(--blue-strong), var(--blue));
+        box-shadow: 0 10px 20px rgba(47, 126, 219, 0.22);
       }
 
       .search {
@@ -105,8 +105,8 @@
         padding: 11px 18px;
         color: #fff;
         font-weight: 700;
-        background: var(--pink-strong);
-        box-shadow: 0 12px 24px rgba(236, 111, 157, 0.24);
+        background: var(--blue-strong);
+        box-shadow: 0 12px 24px rgba(47, 126, 219, 0.22);
       }
 
       main {
@@ -162,9 +162,9 @@
 
       .quick-actions button.active,
       .category-tabs button.active {
-        border-color: var(--pink-strong);
+        border-color: var(--blue-strong);
         color: #fff;
-        background: var(--pink-strong);
+        background: var(--blue-strong);
       }
 
       .panel {
@@ -278,7 +278,7 @@
         top: 10px;
         border-radius: 999px;
         padding: 5px 9px;
-        color: var(--pink-strong);
+        color: var(--blue-strong);
         font-size: 0.78rem;
         font-weight: 700;
         background: #fff;
@@ -292,13 +292,13 @@
         height: 34px;
         place-items: center;
         border-radius: 999px;
-        color: var(--pink-strong);
+        color: var(--blue-strong);
         background: rgba(255, 255, 255, 0.9);
       }
 
       .like.active {
         color: #fff;
-        background: var(--pink-strong);
+        background: var(--blue-strong);
       }
 
       .item-body {
@@ -354,7 +354,7 @@
       }
 
       .bottom-nav button.active {
-        color: var(--pink-strong);
+        color: var(--blue-strong);
         font-weight: 700;
       }
 
@@ -421,7 +421,7 @@
       <main>
         <section class="dashboard" aria-label="マーケット概要">
           <div class="intro">
-            <h1>白と淡いピンクで探しやすいフリマアプリ</h1>
+            <h1>業者用フリマアプリ</h1>
             <p>お気に入りの服、雑貨、ガジェットを気軽に見つけて、すぐに出品できるマーケットです。</p>
             <div class="quick-actions" aria-label="おすすめ条件">
               <button class="active" type="button">おすすめ</button>
@@ -479,14 +479,14 @@
 
     <script>
       const items = [
-        { name: "サテンリボンブラウス", price: "2,400", category: "fashion", tag: "美品", area: "東京", bg: "linear-gradient(135deg, #ffd6e6, #fff)" },
-        { name: "桜色ミニバッグ", price: "3,200", category: "fashion", tag: "人気", area: "神奈川", bg: "linear-gradient(135deg, #f8a8c4, #fbe7ef)" },
-        { name: "ホワイトマグセット", price: "1,500", category: "goods", tag: "送料込", area: "大阪", bg: "linear-gradient(135deg, #ffffff, #ffdce9)" },
-        { name: "ワイヤレスイヤホン", price: "5,800", category: "tech", tag: "即発送", area: "福岡", bg: "linear-gradient(135deg, #fff, #dfe8ff)" },
-        { name: "淡色ルームライト", price: "2,900", category: "goods", tag: "未使用", area: "京都", bg: "linear-gradient(135deg, #fff4c7, #fff)" },
-        { name: "料理レシピブック", price: "900", category: "books", tag: "良品", area: "愛知", bg: "linear-gradient(135deg, #ffe6ef, #ffffff)" },
-        { name: "レザー調カードケース", price: "1,200", category: "fashion", tag: "定番", area: "千葉", bg: "linear-gradient(135deg, #ffd6e6, #f3f3f3)" },
-        { name: "タブレットスタンド", price: "1,800", category: "tech", tag: "便利", area: "兵庫", bg: "linear-gradient(135deg, #ffffff, #e9f4f0)" }
+        { name: "サテンリボンブラウス", price: "2,400", category: "fashion", tag: "美品", area: "東京", bg: "linear-gradient(135deg, #d7eaff, #ffffff)" },
+        { name: "桜色ミニバッグ", price: "3,200", category: "fashion", tag: "人気", area: "神奈川", bg: "linear-gradient(135deg, #8fc5ff, #eaf3ff)" },
+        { name: "ホワイトマグセット", price: "1,500", category: "goods", tag: "送料込", area: "大阪", bg: "linear-gradient(135deg, #ffffff, #cfe4ff)" },
+        { name: "ワイヤレスイヤホン", price: "5,800", category: "tech", tag: "即発送", area: "福岡", bg: "linear-gradient(135deg, #ffffff, #bcd8ff)" },
+        { name: "淡色ルームライト", price: "2,900", category: "goods", tag: "未使用", area: "京都", bg: "linear-gradient(135deg, #eef6ff, #ffffff)" },
+        { name: "料理レシピブック", price: "900", category: "books", tag: "良品", area: "愛知", bg: "linear-gradient(135deg, #dfeeff, #ffffff)" },
+        { name: "レザー調カードケース", price: "1,200", category: "fashion", tag: "定番", area: "千葉", bg: "linear-gradient(135deg, #d7eaff, #f3f8ff)" },
+        { name: "タブレットスタンド", price: "1,800", category: "tech", tag: "便利", area: "兵庫", bg: "linear-gradient(135deg, #ffffff, #d8edf8)" }
       ];
 
       const grid = document.querySelector("#itemGrid");
