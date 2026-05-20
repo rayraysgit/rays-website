@@ -109,6 +109,15 @@
         box-shadow: 0 12px 24px rgba(47, 126, 219, 0.22);
       }
 
+      .ghost-button {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 10px 16px;
+        color: var(--blue-strong);
+        font-weight: 700;
+        background: #fff;
+      }
+
       main {
         width: min(1180px, 100%);
         margin: 0 auto;
@@ -329,6 +338,172 @@
         font-size: 0.86rem;
       }
 
+      .view {
+        display: block;
+      }
+
+      .view[hidden] {
+        display: none;
+      }
+
+      .seller-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .seller-header h1 {
+        font-size: clamp(1.8rem, 3vw, 3rem);
+      }
+
+      .seller-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        gap: 24px;
+        align-items: start;
+      }
+
+      .listing-form,
+      .preview-panel {
+        display: grid;
+        gap: 18px;
+        padding: 24px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: var(--shadow);
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .form-field {
+        display: grid;
+        gap: 7px;
+      }
+
+      .form-field.full {
+        grid-column: 1 / -1;
+      }
+
+      .form-field span {
+        color: var(--ink);
+        font-size: 0.92rem;
+        font-weight: 700;
+      }
+
+      .form-field input,
+      .form-field select,
+      .form-field textarea {
+        width: 100%;
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        color: var(--ink);
+        background: var(--surface-soft);
+      }
+
+      .form-field textarea {
+        min-height: 128px;
+        resize: vertical;
+      }
+
+      .upload-box {
+        display: grid;
+        gap: 10px;
+        place-items: center;
+        min-height: 180px;
+        border: 2px dashed #aacbf0;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        color: var(--muted);
+        background: #f7fbff;
+      }
+
+      .upload-box strong {
+        color: var(--blue-strong);
+      }
+
+      .upload-box input {
+        max-width: 280px;
+      }
+
+      .photo-preview-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .photo-preview {
+        position: relative;
+        overflow: hidden;
+        aspect-ratio: 1 / 1;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface-soft);
+      }
+
+      .photo-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .empty-preview {
+        display: grid;
+        min-height: 180px;
+        place-items: center;
+        border: 1px dashed var(--line);
+        border-radius: 8px;
+        color: var(--muted);
+        background: var(--surface-soft);
+        text-align: center;
+      }
+
+      .summary-card {
+        display: grid;
+        gap: 12px;
+      }
+
+      .summary-photo {
+        aspect-ratio: 4 / 3;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #d7eaff, #ffffff);
+        border: 1px solid var(--line);
+        overflow: hidden;
+      }
+
+      .summary-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .summary-card h2 {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+
+      .summary-card p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
       .bottom-nav {
         position: fixed;
         right: 16px;
@@ -372,6 +547,10 @@
           grid-template-columns: 1fr;
         }
 
+        .seller-layout {
+          grid-template-columns: 1fr;
+        }
+
         .grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
@@ -388,6 +567,18 @@
 
         .stats {
           grid-template-columns: 1fr;
+        }
+
+        .seller-header {
+          display: grid;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .photo-preview-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .grid {
@@ -415,64 +606,150 @@
           <span aria-hidden="true">⌕</span>
           <input id="searchInput" type="search" placeholder="なにを探しますか？" autocomplete="off">
         </label>
-        <button class="sell-button" type="button">出品する</button>
+        <button class="sell-button" type="button" data-open-seller>出品する</button>
       </header>
 
       <main>
-        <section class="dashboard" aria-label="マーケット概要">
-          <div class="intro">
-            <h1>業者用フリマアプリ</h1>
-            <p>お気に入りの服、雑貨、ガジェットを気軽に見つけて、すぐに出品できるマーケットです。</p>
-            <div class="quick-actions" aria-label="おすすめ条件">
-              <button class="active" type="button">おすすめ</button>
-              <button type="button">新品に近い</button>
-              <button type="button">送料込み</button>
-              <button type="button">本日発送</button>
+        <section class="view" id="marketView">
+          <div class="dashboard" aria-label="マーケット概要">
+            <div class="intro">
+              <h1>業者用フリマアプリ</h1>
+              <p>お気に入りの服、雑貨、ガジェットを気軽に見つけて、すぐに出品できるマーケットです。</p>
+              <div class="quick-actions" aria-label="おすすめ条件">
+                <button class="active" type="button">おすすめ</button>
+                <button type="button">新品に近い</button>
+                <button type="button">送料込み</button>
+                <button type="button">本日発送</button>
+              </div>
+            </div>
+
+            <aside class="panel" aria-label="アカウント状況">
+              <h2>今日のマーケット</h2>
+              <p>出品と購入の状況をすばやく確認できます。</p>
+              <div class="stats">
+                <div class="stat">
+                  <strong>24</strong>
+                  <span>新着</span>
+                </div>
+                <div class="stat">
+                  <strong>8</strong>
+                  <span>いいね</span>
+                </div>
+                <div class="stat">
+                  <strong>3</strong>
+                  <span>取引中</span>
+                </div>
+              </div>
+            </aside>
+          </div>
+
+          <div class="section-title">
+            <div>
+              <h2>見つける</h2>
+              <span id="resultCount">8件の商品</span>
             </div>
           </div>
 
-          <aside class="panel" aria-label="アカウント状況">
-            <h2>今日のマーケット</h2>
-            <p>出品と購入の状況をすばやく確認できます。</p>
-            <div class="stats">
-              <div class="stat">
-                <strong>24</strong>
-                <span>新着</span>
-              </div>
-              <div class="stat">
-                <strong>8</strong>
-                <span>いいね</span>
-              </div>
-              <div class="stat">
-                <strong>3</strong>
-                <span>取引中</span>
-              </div>
-            </div>
-          </aside>
+          <nav class="category-tabs" aria-label="カテゴリ">
+            <button class="active" type="button" data-category="all">すべて</button>
+            <button type="button" data-category="fashion">ファッション</button>
+            <button type="button" data-category="goods">雑貨</button>
+            <button type="button" data-category="tech">ガジェット</button>
+            <button type="button" data-category="books">本</button>
+          </nav>
+
+          <section class="grid" id="itemGrid" aria-label="商品一覧"></section>
         </section>
 
-        <div class="section-title">
-          <div>
-            <h2>見つける</h2>
-            <span id="resultCount">8件の商品</span>
+        <section class="view" id="sellerView" hidden>
+          <div class="seller-header">
+            <div>
+              <h1>出品者用画面</h1>
+              <p>商品の写真、価格、在庫情報を登録して、業者向けに出品できます。</p>
+            </div>
+            <button class="ghost-button" type="button" data-open-market>一覧へ戻る</button>
           </div>
-        </div>
 
-        <nav class="category-tabs" aria-label="カテゴリ">
-          <button class="active" type="button" data-category="all">すべて</button>
-          <button type="button" data-category="fashion">ファッション</button>
-          <button type="button" data-category="goods">雑貨</button>
-          <button type="button" data-category="tech">ガジェット</button>
-          <button type="button" data-category="books">本</button>
-        </nav>
+          <div class="seller-layout">
+            <form class="listing-form" id="listingForm">
+              <label class="form-field full">
+                <span>商品の写真</span>
+                <div class="upload-box">
+                  <strong>写真を追加</strong>
+                  <small>複数枚選択できます。1枚目がメイン写真になります。</small>
+                  <input id="photoInput" type="file" accept="image/*" multiple>
+                </div>
+              </label>
 
-        <section class="grid" id="itemGrid" aria-label="商品一覧"></section>
+              <div class="photo-preview-grid" id="photoPreviewGrid">
+                <div class="empty-preview">写真を選択すると<br>ここに表示されます</div>
+              </div>
+
+              <div class="form-grid">
+                <label class="form-field">
+                  <span>商品名</span>
+                  <input id="listingName" type="text" placeholder="例: 業務用タブレットスタンド" value="業務用タブレットスタンド">
+                </label>
+                <label class="form-field">
+                  <span>販売価格</span>
+                  <input id="listingPrice" type="number" min="0" placeholder="5800" value="5800">
+                </label>
+                <label class="form-field">
+                  <span>カテゴリ</span>
+                  <select id="listingCategory">
+                    <option>ガジェット</option>
+                    <option>什器・備品</option>
+                    <option>アパレル</option>
+                    <option>梱包資材</option>
+                    <option>書籍・マニュアル</option>
+                  </select>
+                </label>
+                <label class="form-field">
+                  <span>在庫数</span>
+                  <input id="listingStock" type="number" min="1" placeholder="12" value="12">
+                </label>
+                <label class="form-field">
+                  <span>発送元</span>
+                  <input id="listingArea" type="text" placeholder="東京" value="東京">
+                </label>
+                <label class="form-field">
+                  <span>商品状態</span>
+                  <select id="listingCondition">
+                    <option>新品・未使用</option>
+                    <option>未使用に近い</option>
+                    <option>目立った傷や汚れなし</option>
+                    <option>業務利用済み</option>
+                  </select>
+                </label>
+                <label class="form-field full">
+                  <span>商品説明</span>
+                  <textarea id="listingDescription" placeholder="商品の特徴、ロット数、発送条件などを入力">店舗備品としてまとめて仕入れた商品です。複数購入や継続取引にも対応できます。</textarea>
+                </label>
+              </div>
+
+              <div class="form-actions">
+                <button class="ghost-button" type="reset">下書きをリセット</button>
+                <button class="sell-button" type="submit">出品内容を保存</button>
+              </div>
+            </form>
+
+            <aside class="preview-panel" aria-label="出品プレビュー">
+              <div class="summary-card">
+                <div class="summary-photo" id="summaryPhoto"></div>
+                <h2 id="summaryName">業務用タブレットスタンド</h2>
+                <p><strong id="summaryPrice">¥5,800</strong> ・ <span id="summaryStock">在庫 12点</span></p>
+                <p id="summaryMeta">ガジェット / 東京 / 新品・未使用</p>
+                <p id="summaryDescription">店舗備品としてまとめて仕入れた商品です。複数購入や継続取引にも対応できます。</p>
+              </div>
+            </aside>
+          </div>
+        </section>
       </main>
 
       <nav class="bottom-nav" aria-label="メインナビゲーション">
         <button class="active" type="button">ホーム</button>
         <button type="button">検索</button>
-        <button type="button">出品</button>
+        <button type="button" data-open-seller>出品</button>
         <button type="button">マイページ</button>
       </nav>
     </div>
@@ -493,7 +770,30 @@
       const resultCount = document.querySelector("#resultCount");
       const searchInput = document.querySelector("#searchInput");
       const categoryButtons = document.querySelectorAll("[data-category]");
+      const marketView = document.querySelector("#marketView");
+      const sellerView = document.querySelector("#sellerView");
+      const photoInput = document.querySelector("#photoInput");
+      const photoPreviewGrid = document.querySelector("#photoPreviewGrid");
+      const summaryPhoto = document.querySelector("#summaryPhoto");
+      const listingForm = document.querySelector("#listingForm");
+      const listingFields = {
+        name: document.querySelector("#listingName"),
+        price: document.querySelector("#listingPrice"),
+        category: document.querySelector("#listingCategory"),
+        stock: document.querySelector("#listingStock"),
+        area: document.querySelector("#listingArea"),
+        condition: document.querySelector("#listingCondition"),
+        description: document.querySelector("#listingDescription")
+      };
+      const summaryFields = {
+        name: document.querySelector("#summaryName"),
+        price: document.querySelector("#summaryPrice"),
+        stock: document.querySelector("#summaryStock"),
+        meta: document.querySelector("#summaryMeta"),
+        description: document.querySelector("#summaryDescription")
+      };
       let currentCategory = "all";
+      let previewUrls = [];
 
       function renderItems() {
         const keyword = searchInput.value.trim().toLowerCase();
@@ -539,7 +839,91 @@
         button.textContent = button.classList.contains("active") ? "♥" : "♡";
       });
 
+      function openSellerView() {
+        marketView.hidden = true;
+        sellerView.hidden = false;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function openMarketView() {
+        sellerView.hidden = true;
+        marketView.hidden = false;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function formatYen(value) {
+        const amount = Number(value || 0);
+        return `¥${amount.toLocaleString("ja-JP")}`;
+      }
+
+      function updateListingSummary() {
+        summaryFields.name.textContent = listingFields.name.value || "商品名未入力";
+        summaryFields.price.textContent = formatYen(listingFields.price.value);
+        summaryFields.stock.textContent = `在庫 ${listingFields.stock.value || 0}点`;
+        summaryFields.meta.textContent = `${listingFields.category.value} / ${listingFields.area.value || "発送元未入力"} / ${listingFields.condition.value}`;
+        summaryFields.description.textContent = listingFields.description.value || "商品説明未入力";
+      }
+
+      function clearPreviewUrls() {
+        previewUrls.forEach((url) => URL.revokeObjectURL(url));
+        previewUrls = [];
+      }
+
+      function renderPhotoPreviews(files) {
+        clearPreviewUrls();
+        const selectedFiles = Array.from(files).slice(0, 8);
+
+        if (selectedFiles.length === 0) {
+          photoPreviewGrid.innerHTML = '<div class="empty-preview">写真を選択すると<br>ここに表示されます</div>';
+          summaryPhoto.innerHTML = "";
+          return;
+        }
+
+        const previews = selectedFiles.map((file) => {
+          const url = URL.createObjectURL(file);
+          previewUrls.push(url);
+          return { file, url };
+        });
+
+        photoPreviewGrid.innerHTML = previews.map((preview, index) => `
+          <div class="photo-preview">
+            <img src="${preview.url}" alt="追加した商品写真 ${index + 1}">
+          </div>
+        `).join("");
+
+        summaryPhoto.innerHTML = `<img src="${previews[0].url}" alt="出品商品のメイン写真">`;
+      }
+
+      document.querySelectorAll("[data-open-seller]").forEach((button) => {
+        button.addEventListener("click", openSellerView);
+      });
+
+      document.querySelector("[data-open-market]").addEventListener("click", openMarketView);
+
+      Object.values(listingFields).forEach((field) => {
+        field.addEventListener("input", updateListingSummary);
+        field.addEventListener("change", updateListingSummary);
+      });
+
+      photoInput.addEventListener("change", () => {
+        renderPhotoPreviews(photoInput.files);
+      });
+
+      listingForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        alert("出品内容を保存しました。");
+      });
+
+      listingForm.addEventListener("reset", () => {
+        setTimeout(() => {
+          photoInput.value = "";
+          renderPhotoPreviews([]);
+          updateListingSummary();
+        });
+      });
+
       renderItems();
+      updateListingSummary();
     </script>
   </body>
 </html>
