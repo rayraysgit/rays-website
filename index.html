@@ -137,23 +137,6 @@
         padding: 28px clamp(16px, 4vw, 40px);
       }
 
-      .dashboard {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 320px;
-        gap: 24px;
-        align-items: start;
-      }
-
-      .intro {
-        display: grid;
-        gap: 18px;
-        padding: 28px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.82);
-        box-shadow: var(--shadow);
-      }
-
       h1 {
         max-width: 720px;
         margin: 0;
@@ -161,7 +144,6 @@
         line-height: 1.08;
       }
 
-      .intro p,
       .panel p {
         margin: 0;
         color: var(--muted);
@@ -366,6 +348,52 @@
       .location {
         color: var(--muted);
         font-size: 0.86rem;
+      }
+
+      .detail-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 480px) minmax(0, 1fr);
+        gap: 28px;
+        align-items: start;
+      }
+
+      .detail-photo {
+        overflow: hidden;
+        aspect-ratio: 1 / 1;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: linear-gradient(135deg, #d7eaff, #ffffff);
+      }
+
+      .detail-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .detail-photo.empty {
+        background: var(--detail-bg);
+      }
+
+      .detail-info {
+        display: grid;
+        gap: 16px;
+      }
+
+      .detail-info h1 {
+        font-size: clamp(1.8rem, 3vw, 3rem);
+      }
+
+      .detail-price {
+        font-size: 1.8rem;
+        font-weight: 800;
+      }
+
+      .detail-meta {
+        display: grid;
+        gap: 8px;
+        color: var(--muted);
       }
 
       .view {
@@ -578,11 +606,11 @@
           order: 3;
         }
 
-        .dashboard {
+        .seller-layout {
           grid-template-columns: 1fr;
         }
 
-        .seller-layout {
+        .detail-layout {
           grid-template-columns: 1fr;
         }
 
@@ -594,10 +622,6 @@
       @media (max-width: 560px) {
         .sell-button {
           padding: 10px 14px;
-        }
-
-        .intro {
-          padding: 22px;
         }
 
         .stats {
@@ -643,44 +667,13 @@
         </label>
         <div class="header-actions">
           <button class="sell-button" type="button" data-open-seller>出品する</button>
+          <button class="ghost-button" type="button" data-open-favorites>お気に入り</button>
           <button class="ghost-button" type="button" data-open-history>出品履歴</button>
         </div>
       </header>
 
       <main>
         <section class="view" id="marketView">
-          <div class="dashboard" aria-label="マーケット概要">
-            <div class="intro">
-              <h1>業者用フリマアプリ</h1>
-              <p>お気に入りの服、雑貨、ガジェットを気軽に見つけて、すぐに出品できるマーケットです。</p>
-              <div class="quick-actions" aria-label="おすすめ条件">
-                <button class="active" type="button">おすすめ</button>
-                <button type="button">新品に近い</button>
-                <button type="button">送料込み</button>
-                <button type="button">本日発送</button>
-              </div>
-            </div>
-
-            <aside class="panel" aria-label="アカウント状況">
-              <h2>今日のマーケット</h2>
-              <p>出品と購入の状況をすばやく確認できます。</p>
-              <div class="stats">
-                <div class="stat">
-                  <strong>24</strong>
-                  <span>新着</span>
-                </div>
-                <div class="stat">
-                  <strong>8</strong>
-                  <span>いいね</span>
-                </div>
-                <div class="stat">
-                  <strong>3</strong>
-                  <span>取引中</span>
-                </div>
-              </div>
-            </aside>
-          </div>
-
           <div class="section-title">
             <div>
               <h2>見つける</h2>
@@ -697,6 +690,29 @@
           </nav>
 
           <section class="grid" id="itemGrid" aria-label="商品一覧"></section>
+        </section>
+
+        <section class="view" id="favoritesView" hidden>
+          <div class="seller-header">
+            <div>
+              <h1>お気に入り</h1>
+              <p>ハートを押した商品をまとめて確認できます。</p>
+            </div>
+            <button class="ghost-button" type="button" data-open-market>一覧へ戻る</button>
+          </div>
+
+          <section class="grid" id="favoritesGrid" aria-label="お気に入り一覧"></section>
+        </section>
+
+        <section class="view" id="detailView" hidden>
+          <div class="seller-header">
+            <div>
+              <h1>商品詳細</h1>
+            </div>
+            <button class="ghost-button" type="button" data-open-market>一覧へ戻る</button>
+          </div>
+
+          <section class="detail-layout" id="detailContent" aria-label="商品情報"></section>
         </section>
 
         <section class="view" id="historyView" hidden>
@@ -854,6 +870,10 @@
       const sellerView = document.querySelector("#sellerView");
       const historyView = document.querySelector("#historyView");
       const historyGrid = document.querySelector("#historyGrid");
+      const favoritesView = document.querySelector("#favoritesView");
+      const favoritesGrid = document.querySelector("#favoritesGrid");
+      const detailView = document.querySelector("#detailView");
+      const detailContent = document.querySelector("#detailContent");
       const photoInput = document.querySelector("#photoInput");
       const photoPreviewGrid = document.querySelector("#photoPreviewGrid");
       const summaryPhoto = document.querySelector("#summaryPhoto");
@@ -882,8 +902,18 @@
       let postalLookupId = 0;
       let listingIdCounter = items.length + 1;
       let publishedListings = [];
+      let favoriteIds = new Set();
       let editingListingId = null;
       let currentPhotoUrl = "";
+
+      items = items.map((item, index) => ({
+        id: `item-${index + 1}`,
+        description: `${item.name}の商品情報です。状態や発送元を確認して購入を検討できます。`,
+        stock: "1",
+        condition: item.tag,
+        categoryName: item.category,
+        ...item
+      }));
 
       function escapeHtml(value) {
         return String(value).replace(/[&<>"']/g, (character) => ({
@@ -910,13 +940,14 @@
         const isClickable = options.clickable ? ' role="button" tabindex="0"' : "";
         const imageMarkup = item.photoUrl ? `<img src="${escapeHtml(item.photoUrl)}" alt="${escapeHtml(item.name)}の商品写真">` : "";
         const photoClass = item.photoUrl ? "photo has-image" : "photo";
+        const isFavorite = favoriteIds.has(item.id);
 
         return `
-          <article class="item-card"${isClickable} data-listing-id="${item.id || ""}">
+          <article class="item-card"${isClickable} data-item-id="${item.id || ""}" data-listing-id="${item.id || ""}">
             <div class="${photoClass}" style="--item-bg: ${item.bg}">
               ${imageMarkup}
               <span class="badge">${escapeHtml(item.tag)}</span>
-              ${options.hideLike ? "" : `<button class="like" type="button" aria-label="${escapeHtml(item.name)}をお気に入りに追加">♡</button>`}
+              ${options.hideLike ? "" : `<button class="like${isFavorite ? " active" : ""}" type="button" aria-label="${escapeHtml(item.name)}をお気に入りに追加">${isFavorite ? "♥" : "♡"}</button>`}
             </div>
             <div class="item-body">
               <p class="item-name">${escapeHtml(item.name)}</p>
@@ -953,6 +984,62 @@
         })).join("");
       }
 
+      function renderFavorites() {
+        const favoriteItems = items.filter((item) => favoriteIds.has(item.id));
+
+        if (favoriteItems.length === 0) {
+          favoritesGrid.innerHTML = '<div class="empty-preview">お気に入りに追加した商品はまだありません</div>';
+          return;
+        }
+
+        favoritesGrid.innerHTML = favoriteItems.map((item) => createItemCard(item, {
+          clickable: true
+        })).join("");
+      }
+
+      function getItemById(itemId) {
+        return items.find((item) => item.id === itemId);
+      }
+
+      function renderDetail(item) {
+        const imageMarkup = item.photoUrl
+          ? `<img src="${escapeHtml(item.photoUrl)}" alt="${escapeHtml(item.name)}の商品写真">`
+          : "";
+        const isFavorite = favoriteIds.has(item.id);
+
+        detailContent.innerHTML = `
+          <div class="detail-photo${item.photoUrl ? "" : " empty"}" style="--detail-bg: ${item.bg}">
+            ${imageMarkup}
+          </div>
+          <div class="detail-info">
+            <span class="badge">${escapeHtml(item.tag)}</span>
+            <h1>${escapeHtml(item.name)}</h1>
+            <div class="detail-price">¥${escapeHtml(item.price)}</div>
+            <div class="detail-meta">
+              <span>カテゴリ: ${escapeHtml(item.categoryName || item.category)}</span>
+              <span>発送元: ${escapeHtml(item.area)}</span>
+              <span>在庫: ${escapeHtml(item.stock || "1")}点</span>
+              <span>状態: ${escapeHtml(item.condition || item.tag)}</span>
+            </div>
+            <p>${escapeHtml(item.description || "商品説明はまだありません。")}</p>
+            <button class="ghost-button" type="button" data-detail-favorite="${escapeHtml(item.id)}">${isFavorite ? "お気に入り解除" : "お気に入りに追加"}</button>
+          </div>
+        `;
+      }
+
+      function openDetailView(itemId) {
+        const item = getItemById(itemId);
+        if (!item) return;
+
+        marketView.hidden = true;
+        sellerView.hidden = true;
+        historyView.hidden = true;
+        favoritesView.hidden = true;
+        detailView.hidden = false;
+        renderDetail(item);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
       categoryButtons.forEach((button) => {
         button.addEventListener("click", () => {
           categoryButtons.forEach((item) => item.classList.remove("active"));
@@ -966,9 +1053,23 @@
 
       grid.addEventListener("click", (event) => {
         const button = event.target.closest(".like");
-        if (!button) return;
-        button.classList.toggle("active");
-        button.textContent = button.classList.contains("active") ? "♥" : "♡";
+        const card = event.target.closest("[data-item-id]");
+        if (!card) return;
+
+        if (button) {
+          event.stopPropagation();
+          const itemId = card.dataset.itemId;
+          if (favoriteIds.has(itemId)) {
+            favoriteIds.delete(itemId);
+          } else {
+            favoriteIds.add(itemId);
+          }
+          renderItems();
+          renderFavorites();
+          return;
+        }
+
+        openDetailView(card.dataset.itemId);
       });
 
       function openSellerView() {
@@ -976,6 +1077,8 @@
         resetListingForm();
         marketView.hidden = true;
         historyView.hidden = true;
+        favoritesView.hidden = true;
+        detailView.hidden = true;
         sellerView.hidden = false;
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
@@ -983,6 +1086,8 @@
       function openMarketView() {
         sellerView.hidden = true;
         historyView.hidden = true;
+        favoritesView.hidden = true;
+        detailView.hidden = true;
         marketView.hidden = false;
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
@@ -990,8 +1095,20 @@
       function openHistoryView() {
         sellerView.hidden = true;
         marketView.hidden = true;
+        favoritesView.hidden = true;
+        detailView.hidden = true;
         historyView.hidden = false;
         renderHistory();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function openFavoritesView() {
+        sellerView.hidden = true;
+        marketView.hidden = true;
+        historyView.hidden = true;
+        detailView.hidden = true;
+        favoritesView.hidden = false;
+        renderFavorites();
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
@@ -1107,6 +1224,7 @@
 
         renderItems();
         renderHistory();
+        renderFavorites();
         alert(existingIndex >= 0 ? "出品情報を更新しました。" : "出品しました。");
         editingListingId = null;
         previewUrls = [];
@@ -1164,6 +1282,8 @@
         updatePublishButtonState();
         marketView.hidden = true;
         historyView.hidden = true;
+        favoritesView.hidden = true;
+        detailView.hidden = true;
         sellerView.hidden = false;
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
@@ -1210,6 +1330,8 @@
 
       document.querySelector("[data-open-history]").addEventListener("click", openHistoryView);
 
+      document.querySelector("[data-open-favorites]").addEventListener("click", openFavoritesView);
+
       Object.values(listingFields).forEach((field) => {
         field.addEventListener("input", handleListingChange);
         field.addEventListener("change", handleListingChange);
@@ -1244,6 +1366,39 @@
         editListing(card.dataset.listingId);
       });
 
+      favoritesGrid.addEventListener("click", (event) => {
+        const button = event.target.closest(".like");
+        const card = event.target.closest("[data-item-id]");
+        if (!card) return;
+
+        if (button) {
+          event.stopPropagation();
+          favoriteIds.delete(card.dataset.itemId);
+          renderItems();
+          renderFavorites();
+          return;
+        }
+
+        openDetailView(card.dataset.itemId);
+      });
+
+      detailContent.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-detail-favorite]");
+        if (!button) return;
+
+        const itemId = button.dataset.detailFavorite;
+        if (favoriteIds.has(itemId)) {
+          favoriteIds.delete(itemId);
+        } else {
+          favoriteIds.add(itemId);
+        }
+
+        const item = getItemById(itemId);
+        if (item) renderDetail(item);
+        renderItems();
+        renderFavorites();
+      });
+
       historyGrid.addEventListener("keydown", (event) => {
         if (event.key !== "Enter" && event.key !== " ") return;
         const card = event.target.closest("[data-listing-id]");
@@ -1261,6 +1416,7 @@
 
       renderItems();
       renderHistory();
+      renderFavorites();
       updateListingSummary();
       updatePublishButtonState();
     </script>
