@@ -59,6 +59,12 @@
         backdrop-filter: blur(14px);
       }
 
+      .header-actions {
+        display: grid;
+        gap: 8px;
+        justify-items: end;
+      }
+
       .brand {
         display: flex;
         gap: 10px;
@@ -256,8 +262,13 @@
         box-shadow: 0 12px 24px rgba(92, 54, 67, 0.08);
       }
 
+      .item-card[role="button"] {
+        cursor: pointer;
+      }
+
       .photo {
         position: relative;
+        overflow: hidden;
         aspect-ratio: 1 / 1;
         background: var(--surface-soft);
       }
@@ -280,6 +291,18 @@
         height: 10%;
         border-radius: 999px;
         background: rgba(255, 255, 255, 0.78);
+      }
+
+      .photo.has-image::before,
+      .photo.has-image::after {
+        display: none;
+      }
+
+      .photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
       }
 
       .badge,
@@ -618,7 +641,10 @@
           <span aria-hidden="true">⌕</span>
           <input id="searchInput" type="search" placeholder="なにを探しますか？" autocomplete="off">
         </label>
-        <button class="sell-button" type="button" data-open-seller>出品する</button>
+        <div class="header-actions">
+          <button class="sell-button" type="button" data-open-seller>出品する</button>
+          <button class="ghost-button" type="button" data-open-history>出品履歴</button>
+        </div>
       </header>
 
       <main>
@@ -671,6 +697,18 @@
           </nav>
 
           <section class="grid" id="itemGrid" aria-label="商品一覧"></section>
+        </section>
+
+        <section class="view" id="historyView" hidden>
+          <div class="seller-header">
+            <div>
+              <h1>出品履歴</h1>
+              <p>出品が完了した商品の確認と編集ができます。</p>
+            </div>
+            <button class="ghost-button" type="button" data-open-market>一覧へ戻る</button>
+          </div>
+
+          <section class="grid" id="historyGrid" aria-label="出品履歴一覧"></section>
         </section>
 
         <section class="view" id="sellerView" hidden>
@@ -797,7 +835,7 @@
     </div>
 
     <script>
-      const items = [
+      let items = [
         { name: "サテンリボンブラウス", price: "2,400", category: "fashion", tag: "美品", area: "東京", bg: "linear-gradient(135deg, #d7eaff, #ffffff)" },
         { name: "桜色ミニバッグ", price: "3,200", category: "fashion", tag: "人気", area: "神奈川", bg: "linear-gradient(135deg, #8fc5ff, #eaf3ff)" },
         { name: "ホワイトマグセット", price: "1,500", category: "goods", tag: "送料込", area: "大阪", bg: "linear-gradient(135deg, #ffffff, #cfe4ff)" },
@@ -814,6 +852,8 @@
       const categoryButtons = document.querySelectorAll("[data-category]");
       const marketView = document.querySelector("#marketView");
       const sellerView = document.querySelector("#sellerView");
+      const historyView = document.querySelector("#historyView");
+      const historyGrid = document.querySelector("#historyGrid");
       const photoInput = document.querySelector("#photoInput");
       const photoPreviewGrid = document.querySelector("#photoPreviewGrid");
       const summaryPhoto = document.querySelector("#summaryPhoto");
@@ -839,8 +879,55 @@
       };
       let currentCategory = "all";
       let previewUrls = [];
-      let listingSaved = false;
       let postalLookupId = 0;
+      let listingIdCounter = items.length + 1;
+      let publishedListings = [];
+      let editingListingId = null;
+      let currentPhotoUrl = "";
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (character) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          "\"": "&quot;",
+          "'": "&#39;"
+        })[character]);
+      }
+
+      function formatPrice(value) {
+        return Number(value || 0).toLocaleString("ja-JP");
+      }
+
+      function getCategoryKey(categoryName) {
+        if (["アパレル", "靴・バッグ", "美容・コスメ"].includes(categoryName)) return "fashion";
+        if (["書籍・マニュアル"].includes(categoryName)) return "books";
+        if (["ガジェット", "電子機器", "パソコン・周辺機器", "スマートフォン・タブレット", "カメラ・映像機器", "生活家電"].includes(categoryName)) return "tech";
+        return "goods";
+      }
+
+      function createItemCard(item, options = {}) {
+        const isClickable = options.clickable ? ' role="button" tabindex="0"' : "";
+        const imageMarkup = item.photoUrl ? `<img src="${escapeHtml(item.photoUrl)}" alt="${escapeHtml(item.name)}の商品写真">` : "";
+        const photoClass = item.photoUrl ? "photo has-image" : "photo";
+
+        return `
+          <article class="item-card"${isClickable} data-listing-id="${item.id || ""}">
+            <div class="${photoClass}" style="--item-bg: ${item.bg}">
+              ${imageMarkup}
+              <span class="badge">${escapeHtml(item.tag)}</span>
+              ${options.hideLike ? "" : `<button class="like" type="button" aria-label="${escapeHtml(item.name)}をお気に入りに追加">♡</button>`}
+            </div>
+            <div class="item-body">
+              <p class="item-name">${escapeHtml(item.name)}</p>
+              <div class="item-meta">
+                <span class="price">¥${escapeHtml(item.price)}</span>
+                <span class="location">${escapeHtml(item.area)}</span>
+              </div>
+            </div>
+          </article>
+        `;
+      }
 
       function renderItems() {
         const keyword = searchInput.value.trim().toLowerCase();
@@ -851,21 +938,19 @@
         });
 
         resultCount.textContent = `${filtered.length}件の商品`;
-        grid.innerHTML = filtered.map((item) => `
-          <article class="item-card">
-            <div class="photo" style="--item-bg: ${item.bg}">
-              <span class="badge">${item.tag}</span>
-              <button class="like" type="button" aria-label="${item.name}をお気に入りに追加">♡</button>
-            </div>
-            <div class="item-body">
-              <p class="item-name">${item.name}</p>
-              <div class="item-meta">
-                <span class="price">¥${item.price}</span>
-                <span class="location">${item.area}</span>
-              </div>
-            </div>
-          </article>
-        `).join("");
+        grid.innerHTML = filtered.map((item) => createItemCard(item)).join("");
+      }
+
+      function renderHistory() {
+        if (publishedListings.length === 0) {
+          historyGrid.innerHTML = '<div class="empty-preview">出品が完了した商品はまだありません</div>';
+          return;
+        }
+
+        historyGrid.innerHTML = publishedListings.map((item) => createItemCard(item, {
+          clickable: true,
+          hideLike: true
+        })).join("");
       }
 
       categoryButtons.forEach((button) => {
@@ -887,14 +972,26 @@
       });
 
       function openSellerView() {
+        editingListingId = null;
+        resetListingForm();
         marketView.hidden = true;
+        historyView.hidden = true;
         sellerView.hidden = false;
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
       function openMarketView() {
         sellerView.hidden = true;
+        historyView.hidden = true;
         marketView.hidden = false;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function openHistoryView() {
+        sellerView.hidden = true;
+        marketView.hidden = true;
+        historyView.hidden = false;
+        renderHistory();
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
@@ -913,11 +1010,10 @@
       }
 
       function updatePublishButtonState() {
-        publishListingButton.disabled = !listingForm.checkValidity() || !listingSaved;
+        publishListingButton.disabled = !listingForm.checkValidity() || !listingFields.addressArea.value.trim();
       }
 
       function handleListingChange() {
-        listingSaved = false;
         updateListingSummary();
         updatePublishButtonState();
       }
@@ -930,7 +1026,6 @@
         const lookupId = ++postalLookupId;
         const postalCode = normalizePostalCode(listingFields.postalCode.value);
 
-        listingSaved = false;
         listingFields.addressArea.value = "";
 
         if (postalCode.length !== 7) {
@@ -965,6 +1060,114 @@
         updatePublishButtonState();
       }
 
+      function collectListingData() {
+        const address = [listingFields.addressArea.value, listingFields.addressDetail.value].filter(Boolean).join(" ");
+        return {
+          id: editingListingId || `listing-${listingIdCounter++}`,
+          name: listingFields.name.value.trim(),
+          price: formatPrice(listingFields.price.value),
+          priceValue: listingFields.price.value,
+          category: getCategoryKey(listingFields.category.value),
+          categoryName: listingFields.category.value,
+          tag: listingFields.condition.value,
+          area: listingFields.addressArea.value || "発送元未入力",
+          address,
+          postalCode: listingFields.postalCode.value,
+          addressArea: listingFields.addressArea.value,
+          addressDetail: listingFields.addressDetail.value,
+          stock: listingFields.stock.value,
+          condition: listingFields.condition.value,
+          description: listingFields.description.value,
+          photoUrl: currentPhotoUrl,
+          bg: "linear-gradient(135deg, #ffffff, #cfe4ff)"
+        };
+      }
+
+      function publishListing() {
+        if (!listingForm.checkValidity() || !listingFields.addressArea.value.trim()) {
+          listingForm.reportValidity();
+          if (!listingFields.addressArea.value.trim()) {
+            alert("郵便番号から住所が表示されてから出品してください。");
+          }
+          updatePublishButtonState();
+          return;
+        }
+
+        const listing = collectListingData();
+        const existingIndex = publishedListings.findIndex((item) => item.id === listing.id);
+
+        if (existingIndex >= 0) {
+          publishedListings[existingIndex] = listing;
+          const itemIndex = items.findIndex((item) => item.id === listing.id);
+          if (itemIndex >= 0) items[itemIndex] = listing;
+        } else {
+          publishedListings.unshift(listing);
+          items.unshift(listing);
+        }
+
+        renderItems();
+        renderHistory();
+        alert(existingIndex >= 0 ? "出品情報を更新しました。" : "出品しました。");
+        editingListingId = null;
+        previewUrls = [];
+        resetListingForm();
+        openMarketView();
+      }
+
+      function resetListingForm() {
+        listingFields.name.value = "";
+        listingFields.price.value = "";
+        listingFields.category.value = "ガジェット";
+        listingFields.stock.value = "";
+        listingFields.postalCode.value = "";
+        listingFields.addressArea.value = "";
+        listingFields.addressArea.placeholder = "郵便番号から自動表示";
+        listingFields.addressDetail.value = "";
+        listingFields.condition.value = "新品・未使用";
+        listingFields.description.value = "";
+        photoInput.value = "";
+        currentPhotoUrl = "";
+        renderPhotoPreviews([]);
+        updateListingSummary();
+        updatePublishButtonState();
+      }
+
+      function editListing(listingId) {
+        const listing = publishedListings.find((item) => item.id === listingId);
+        if (!listing) return;
+
+        editingListingId = listing.id;
+        listingFields.name.value = listing.name;
+        listingFields.price.value = listing.priceValue || String(listing.price).replace(/\D/g, "");
+        listingFields.category.value = listing.categoryName;
+        listingFields.stock.value = listing.stock;
+        listingFields.postalCode.value = listing.postalCode;
+        listingFields.addressArea.value = listing.addressArea;
+        listingFields.addressDetail.value = listing.addressDetail;
+        listingFields.condition.value = listing.condition;
+        listingFields.description.value = listing.description;
+        currentPhotoUrl = listing.photoUrl || "";
+        photoInput.value = "";
+
+        if (currentPhotoUrl) {
+          photoPreviewGrid.innerHTML = `
+            <div class="photo-preview">
+              <img src="${escapeHtml(currentPhotoUrl)}" alt="追加した商品写真 1">
+            </div>
+          `;
+          summaryPhoto.innerHTML = `<img src="${escapeHtml(currentPhotoUrl)}" alt="出品商品のメイン写真">`;
+        } else {
+          renderPhotoPreviews([]);
+        }
+
+        updateListingSummary();
+        updatePublishButtonState();
+        marketView.hidden = true;
+        historyView.hidden = true;
+        sellerView.hidden = false;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
       function clearPreviewUrls() {
         previewUrls.forEach((url) => URL.revokeObjectURL(url));
         previewUrls = [];
@@ -977,6 +1180,7 @@
         if (selectedFiles.length === 0) {
           photoPreviewGrid.innerHTML = '<div class="empty-preview">写真を選択すると<br>ここに表示されます</div>';
           summaryPhoto.innerHTML = "";
+          currentPhotoUrl = "";
           return;
         }
 
@@ -993,13 +1197,18 @@
         `).join("");
 
         summaryPhoto.innerHTML = `<img src="${previews[0].url}" alt="出品商品のメイン写真">`;
+        currentPhotoUrl = previews[0].url;
       }
 
       document.querySelectorAll("[data-open-seller]").forEach((button) => {
         button.addEventListener("click", openSellerView);
       });
 
-      document.querySelector("[data-open-market]").addEventListener("click", openMarketView);
+      document.querySelectorAll("[data-open-market]").forEach((button) => {
+        button.addEventListener("click", openMarketView);
+      });
+
+      document.querySelector("[data-open-history]").addEventListener("click", openHistoryView);
 
       Object.values(listingFields).forEach((field) => {
         field.addEventListener("input", handleListingChange);
@@ -1011,6 +1220,7 @@
 
       photoInput.addEventListener("change", () => {
         renderPhotoPreviews(photoInput.files);
+        handleListingChange();
       });
 
       listingForm.addEventListener("submit", (event) => {
@@ -1020,29 +1230,37 @@
           updatePublishButtonState();
           return;
         }
-        listingSaved = true;
         updatePublishButtonState();
         alert("出品内容を保存しました。");
       });
 
       publishListingButton.addEventListener("click", () => {
-        if (publishListingButton.disabled) return;
-        alert("出品しました。");
-        openMarketView();
+        publishListing();
+      });
+
+      historyGrid.addEventListener("click", (event) => {
+        const card = event.target.closest("[data-listing-id]");
+        if (!card) return;
+        editListing(card.dataset.listingId);
+      });
+
+      historyGrid.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        const card = event.target.closest("[data-listing-id]");
+        if (!card) return;
+        event.preventDefault();
+        editListing(card.dataset.listingId);
       });
 
       listingForm.addEventListener("reset", () => {
         setTimeout(() => {
-          photoInput.value = "";
-          renderPhotoPreviews([]);
-          listingSaved = false;
-          updateAddressFromPostalCode();
-          updateListingSummary();
-          updatePublishButtonState();
+          editingListingId = null;
+          resetListingForm();
         });
       });
 
       renderItems();
+      renderHistory();
       updateListingSummary();
       updatePublishButtonState();
     </script>
