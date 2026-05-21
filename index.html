@@ -109,6 +109,13 @@
         box-shadow: 0 12px 24px rgba(47, 126, 219, 0.22);
       }
 
+      .sell-button:disabled {
+        cursor: not-allowed;
+        background: #9aa7b7;
+        box-shadow: none;
+        opacity: 0.68;
+      }
+
       .ghost-button {
         border: 1px solid var(--line);
         border-radius: 999px;
@@ -688,11 +695,11 @@
               <div class="form-grid">
                 <label class="form-field">
                   <span>商品名</span>
-                  <input id="listingName" type="text" placeholder="例: 業務用タブレットスタンド" value="業務用タブレットスタンド">
+                  <input id="listingName" type="text" placeholder="例: 業務用タブレットスタンド" value="業務用タブレットスタンド" required>
                 </label>
                 <label class="form-field">
                   <span>販売価格</span>
-                  <input id="listingPrice" type="number" min="0" placeholder="5800" value="5800">
+                  <input id="listingPrice" type="number" min="1" placeholder="5800" value="5800" required>
                 </label>
                 <label class="form-field">
                   <span>カテゴリ</span>
@@ -706,11 +713,11 @@
                 </label>
                 <label class="form-field">
                   <span>在庫数</span>
-                  <input id="listingStock" type="number" min="1" placeholder="12" value="12">
+                  <input id="listingStock" type="number" min="1" placeholder="12" value="12" required>
                 </label>
                 <label class="form-field">
                   <span>発送元</span>
-                  <input id="listingArea" type="text" placeholder="東京" value="東京">
+                  <input id="listingArea" type="text" placeholder="東京" value="東京" required>
                 </label>
                 <label class="form-field">
                   <span>商品状態</span>
@@ -723,13 +730,14 @@
                 </label>
                 <label class="form-field full">
                   <span>商品説明</span>
-                  <textarea id="listingDescription" placeholder="商品の特徴、ロット数、発送条件などを入力">店舗備品としてまとめて仕入れた商品です。複数購入や継続取引にも対応できます。</textarea>
+                  <textarea id="listingDescription" placeholder="商品の特徴、ロット数、発送条件などを入力" required>店舗備品としてまとめて仕入れた商品です。複数購入や継続取引にも対応できます。</textarea>
                 </label>
               </div>
 
               <div class="form-actions">
                 <button class="ghost-button" type="reset">下書きをリセット</button>
                 <button class="sell-button" type="submit">出品内容を保存</button>
+                <button class="sell-button" id="publishListingButton" type="button" disabled>出品</button>
               </div>
             </form>
 
@@ -776,6 +784,7 @@
       const photoPreviewGrid = document.querySelector("#photoPreviewGrid");
       const summaryPhoto = document.querySelector("#summaryPhoto");
       const listingForm = document.querySelector("#listingForm");
+      const publishListingButton = document.querySelector("#publishListingButton");
       const listingFields = {
         name: document.querySelector("#listingName"),
         price: document.querySelector("#listingPrice"),
@@ -794,6 +803,7 @@
       };
       let currentCategory = "all";
       let previewUrls = [];
+      let listingSaved = false;
 
       function renderItems() {
         const keyword = searchInput.value.trim().toLowerCase();
@@ -864,6 +874,16 @@
         summaryFields.description.textContent = listingFields.description.value || "商品説明未入力";
       }
 
+      function updatePublishButtonState() {
+        publishListingButton.disabled = !listingForm.checkValidity() || !listingSaved;
+      }
+
+      function handleListingChange() {
+        listingSaved = false;
+        updateListingSummary();
+        updatePublishButtonState();
+      }
+
       function clearPreviewUrls() {
         previewUrls.forEach((url) => URL.revokeObjectURL(url));
         previewUrls = [];
@@ -901,8 +921,8 @@
       document.querySelector("[data-open-market]").addEventListener("click", openMarketView);
 
       Object.values(listingFields).forEach((field) => {
-        field.addEventListener("input", updateListingSummary);
-        field.addEventListener("change", updateListingSummary);
+        field.addEventListener("input", handleListingChange);
+        field.addEventListener("change", handleListingChange);
       });
 
       photoInput.addEventListener("change", () => {
@@ -911,19 +931,35 @@
 
       listingForm.addEventListener("submit", (event) => {
         event.preventDefault();
+        if (!listingForm.checkValidity()) {
+          listingForm.reportValidity();
+          updatePublishButtonState();
+          return;
+        }
+        listingSaved = true;
+        updatePublishButtonState();
         alert("出品内容を保存しました。");
+      });
+
+      publishListingButton.addEventListener("click", () => {
+        if (publishListingButton.disabled) return;
+        alert("出品しました。");
+        openMarketView();
       });
 
       listingForm.addEventListener("reset", () => {
         setTimeout(() => {
           photoInput.value = "";
           renderPhotoPreviews([]);
+          listingSaved = false;
           updateListingSummary();
+          updatePublishButtonState();
         });
       });
 
       renderItems();
       updateListingSummary();
+      updatePublishButtonState();
     </script>
   </body>
 </html>
