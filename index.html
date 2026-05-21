@@ -851,16 +851,7 @@
     </div>
 
     <script>
-      let items = [
-        { name: "サテンリボンブラウス", price: "2,400", category: "fashion", tag: "美品", area: "東京", bg: "linear-gradient(135deg, #d7eaff, #ffffff)" },
-        { name: "桜色ミニバッグ", price: "3,200", category: "fashion", tag: "人気", area: "神奈川", bg: "linear-gradient(135deg, #8fc5ff, #eaf3ff)" },
-        { name: "ホワイトマグセット", price: "1,500", category: "goods", tag: "送料込", area: "大阪", bg: "linear-gradient(135deg, #ffffff, #cfe4ff)" },
-        { name: "ワイヤレスイヤホン", price: "5,800", category: "tech", tag: "即発送", area: "福岡", bg: "linear-gradient(135deg, #ffffff, #bcd8ff)" },
-        { name: "淡色ルームライト", price: "2,900", category: "goods", tag: "未使用", area: "京都", bg: "linear-gradient(135deg, #eef6ff, #ffffff)" },
-        { name: "料理レシピブック", price: "900", category: "books", tag: "良品", area: "愛知", bg: "linear-gradient(135deg, #dfeeff, #ffffff)" },
-        { name: "レザー調カードケース", price: "1,200", category: "fashion", tag: "定番", area: "千葉", bg: "linear-gradient(135deg, #d7eaff, #f3f8ff)" },
-        { name: "タブレットスタンド", price: "1,800", category: "tech", tag: "便利", area: "兵庫", bg: "linear-gradient(135deg, #ffffff, #d8edf8)" }
-      ];
+      let items = [];
 
       const grid = document.querySelector("#itemGrid");
       const resultCount = document.querySelector("#resultCount");
@@ -1022,6 +1013,7 @@
               <span>状態: ${escapeHtml(item.condition || item.tag)}</span>
             </div>
             <p>${escapeHtml(item.description || "商品説明はまだありません。")}</p>
+            <button class="sell-button" type="button" data-purchase-item="${escapeHtml(item.id)}">購入する</button>
             <button class="ghost-button" type="button" data-detail-favorite="${escapeHtml(item.id)}">${isFavorite ? "お気に入り解除" : "お気に入りに追加"}</button>
           </div>
         `;
@@ -1383,6 +1375,14 @@
       });
 
       detailContent.addEventListener("click", (event) => {
+        const purchaseButton = event.target.closest("[data-purchase-item]");
+        if (purchaseButton) {
+          const item = getItemById(purchaseButton.dataset.purchaseItem);
+          if (!item) return;
+          alert(`${item.name}を購入しました。`);
+          return;
+        }
+
         const button = event.target.closest("[data-detail-favorite]");
         if (!button) return;
 
